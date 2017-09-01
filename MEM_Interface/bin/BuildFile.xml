@@ -1,0 +1,4 @@
+<bin name="runMEM" file="runMEM.cc">
+  <use name="ttH_Htautau_MEM_Analysis/MEM"/>
+  <use name="ttHTauTau_MEM_Interface/MEM_Interface"/>
+</bin>

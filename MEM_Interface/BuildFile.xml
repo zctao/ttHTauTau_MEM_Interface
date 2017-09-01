@@ -1,0 +1,8 @@
+<use name="root"/>
+<use name="python"/>
+<use name="ttH_Htautau_MEM_Analysis/MEMAlgo"/>
+<use name="ttHTauTauAnalysis/ttHtautauAnalyzer"/>
+
+<export>
+  <lib   name="1"/>
+</export>
