@@ -26,15 +26,10 @@ Compile:
 
 	scram b -j 8
 
-## Run
-
-Usage:
+## Usage
 
 	runMEM <maxevents> <startevents> <input.root> <output.root> config.py
 
-Input root file is expected to be of the format defined in ttHTauTauAnalysis/ttHtautauAnalyzer/interface/eventNtuple.h
+Input ntuple is expected to be of the format defined in ttHTauTauAnalysis/ttHtautauAnalyzer/interface/eventNtuple.h
 
-An example input file 'nutple_ttH.root' and a script running on this input file are provided in the test directory. By default, it uses MEM config file 'mem_cfg.py' under python directory and starts from event #0. 'mem_output.root' is the default output file.
-
-   ./run_mem.sh <maxevents>
-
+An example input file 'nutple_ttH.root' and a script running on this file are provided in the test directory. By default, it uses MEM config file 'mem_cfg.py' under python directory and starts from event #0. 'mem_output.root' is the default output file.
