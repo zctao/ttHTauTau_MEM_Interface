@@ -6,8 +6,8 @@ A supporting package for running Matrix Element Method computation on ntuples pr
 
 Setup CMSSW environment:
 	  
-	cmsrel CMSSW_8_1_0
-	cd CMSSW_8_1_0/src/
+	cmsrel CMSSW_9_4_4
+	cd CMSSW_9_4_4/src/
 	cmsenv
 
 Get MEM package from LLR for ttH, H->tautau analysis:
@@ -17,10 +17,16 @@ Get MEM package from LLR for ttH, H->tautau analysis:
 Get ttHTauTauAnalysis analyzer:
 
 	git clone https://github.com/zctao/ttHTauTauAnalysis.git
+	cd ttHTauTauAnalysis/
+	git checkout cmssw_9_4_x
+	cd -
 
 Get interface package:
 
 	git clone https://github.com/zctao/ttHTauTau_MEM_Interface.git
+	cd ttHTauTau_MEM_Interface/
+	git checkout cmssw_9_4_x
+	cd -
 
 Compile:
 
@@ -28,7 +34,7 @@ Compile:
 
 ## Usage
 
-	runMEM <maxevents> <startevents> <input.root> <output.root> config.py
+	runMEM -i <input.root> -o <output.root> -m <maxevents> -s <startevent> -c <config.py>
 
 Input ntuple is expected to be of the format defined in ttHTauTauAnalysis/ttHtautauAnalyzer/interface/eventNtuple.h
 

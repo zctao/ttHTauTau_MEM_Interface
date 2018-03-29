@@ -47,8 +47,8 @@ void EventReader_MEM::fillEventList(IntegrationMsg_t* integration, int64_t nEven
 		// build four momentum
 		auto leptons = evNtuple_.buildLeptons(looseSel_);
 		auto taus = evNtuple_.buildFourVectorTaus(looseSel_);
-		auto jets = evNtuple_.buildFourVectorJets(looseSel_);
-		auto jets_btag = evNtuple_.buildFourVectorBtagJets(looseSel_);
+		auto jets = evNtuple_.buildFourVectorJets();
+		auto jets_btag = evNtuple_.buildFourVectorBtagJets();
 		auto met = evNtuple_.buildFourVectorMET();
 		
 		std::vector<TLorentzVector> jets_untag;

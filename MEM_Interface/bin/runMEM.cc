@@ -12,6 +12,8 @@
 
 #include <iostream>
 
+#include "boost/program_options.hpp"
+
 // Root
 #include "TFile.h"
 #include "TTree.h"
@@ -26,32 +28,41 @@ int main(const int argc, const char** argv)
 	//@@@                   Configuration                                      @@@
 	//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 	//
-	if (argc!=6) {
-		//cerr << "Usage : " << argv[0] << " config.py <input.root> "
-		//	 << "<maxevents> <startevents> <output.root>" << endl;
-		cerr << "Usage : " << argv[0] << " <maxevents> <startevents> "
-			 << "<input.root> <output.root> config.py" << endl;
+
+	namespace po = boost::program_options;
+
+	string configName, inputFileName, outputName;
+	int maxNbrOfEventsToRead, startEvents;
+	
+	po::options_description desc("Options");
+	desc.add_options()
+		("help,h", "produce help message")
+		("input,i", po::value<string>(&inputFileName), "input ntuple name")
+		("output,o", po::value<string>(&outputName)->default_value("mem_output.root"), "output name")
+		("maxevents,m", po::value<int>(&maxNbrOfEventsToRead), "max number of event to process")
+		("startEvents,s", po::value<int>(&startEvents)->default_value(0), "start event index")
+		("config,c", po::value<string>(&configName)->default_value("ttHTauTau_MEM_Interface/MEM_Interface/mem_cfg.py"), "config file name");
+
+	po::variables_map vm;
+	po::store(po::command_line_parser(argc, argv).options(desc).run(), vm);
+	po::notify(vm);
+
+	if (vm.count("help")) {
+		cout << desc << endl;
 		return 1;
 	}
 	
-	string configName( argv[5] );
 	// Remove ".py"
 	size_t pos = configName.find(".py", configName.length()-3);
 	if ( pos != string::npos )
 		configName.resize( configName.length()-3 );
-	//if (argc == 1) configName = "defaultConfig";
-
-	string inputFileName = argv[3];
-	const int maxNbrOfEventsToRead = atoi(argv[1]);
-	const int startEvents = atoi(argv[2]);
-	const char* outputName = argv[4];
 	
 	//
 	const RunConfig* runConfig = new RunConfig(configName.c_str());  
 	scheduler = new ThreadScheduler();
 
 	EventReader_MEM* evtRead =
-		new EventReader_MEM(inputFileName,startEvents,maxNbrOfEventsToRead,true,
+		new EventReader_MEM(inputFileName,startEvents,maxNbrOfEventsToRead,false,
 							"ttHtaus/eventTree");
 	
 	eventList_t eventList;
@@ -63,7 +74,7 @@ int main(const int argc, const char** argv)
 	scheduler->runNodeScheduler ( eventList, maxNbrOfEventsToRead );
 
 	// Write output to tree
-	TFile* f_out = new TFile(outputName, "recreate");
+	TFile* f_out = new TFile(outputName.c_str(), "recreate");
 	TTree* tree_mem = new TTree("mem", "mem");
 	
 	double Integral_ttH;
