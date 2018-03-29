@@ -39,7 +39,7 @@ int main(const int argc, const char** argv)
 		("help,h", "produce help message")
 		("input,i", po::value<string>(&inputFileName), "input ntuple name")
 		("output,o", po::value<string>(&outputName)->default_value("mem_output.root"), "output name")
-		("maxevents,m", po::value<int>(&maxNbrOfEventsToRead), "max number of event to process")
+		("maxevents,m", po::value<int>(&maxNbrOfEventsToRead)->default_value(-1), "max number of event to process. -1 to process all events.")
 		("startEvents,s", po::value<int>(&startEvents)->default_value(0), "start event index")
 		("config,c", po::value<string>(&configName)->default_value("ttHTauTau_MEM_Interface/MEM_Interface/mem_cfg.py"), "config file name");
 
@@ -65,13 +65,18 @@ int main(const int argc, const char** argv)
 		new EventReader_MEM(inputFileName,startEvents,maxNbrOfEventsToRead,false,
 							"ttHtaus/eventTree");
 	
-	eventList_t eventList;
-	evtRead->fillEventList(eventList, maxNbrOfEventsToRead);
+	int nEvents = evtRead->numberOfEvents();
+
+	//eventList_t eventList;
+	std::vector<IntegrationMsg_t> eventList;
+	eventList.resize(nEvents);
+	
+	evtRead->fillEventList(&eventList[0]);
 
 	delete evtRead;
 	
 	scheduler->initNodeScheduler( runConfig, 0 );
-	scheduler->runNodeScheduler ( eventList, maxNbrOfEventsToRead );
+	scheduler->runNodeScheduler ( &eventList[0], nEvents );
 
 	// Write output to tree
 	TFile* f_out = new TFile(outputName.c_str(), "recreate");
@@ -100,8 +105,7 @@ int main(const int argc, const char** argv)
 	tree_mem->Branch("Integration_type", &Integration_type);
 	tree_mem->Branch("MEM_LR", &MEM_LR);
 	
-	//for (int event=0; event<runConfig->maxNbrOfEventsToRead_;event++) {
-	for (int event=0; event<maxNbrOfEventsToRead;event++) {
+	for (int event=0; event<nEvents;event++) {
 		Integral_ttH = eventList[event].weight_ttH_;
 		Integral_ttH_err = eventList[event].weight_error_ttH_;
 		Integral_ttZ = eventList[event].weight_ttZ_;

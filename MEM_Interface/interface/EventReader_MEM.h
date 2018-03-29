@@ -13,6 +13,7 @@
 
 #include <string>
 #include <algorithm>
+#include <vector>
 
 class EventReader_MEM
 {
@@ -21,7 +22,9 @@ class EventReader_MEM
 	EventReader_MEM(const TString&, int64_t, int64_t, bool, const TString&);
 	~EventReader_MEM();
 
-	void fillEventList(IntegrationMsg_t*, int64_t);
+	void fillEventList(IntegrationMsg_t*);
+
+	int64_t numberOfEvents() {return nevents_;}
 
  private:
 

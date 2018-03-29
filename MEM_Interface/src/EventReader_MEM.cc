@@ -14,16 +14,28 @@ EventReader_MEM::EventReader_MEM(const TString& filename,const int64_t startEven
 	evNtuple_.set_branch_address(intree_);
 	
 	startevent_ = startEvent;
-	nevents_ = maxNbrEventsToRead;
+
+	if (maxNbrEventsToRead < 0){
+		nevents_ = intree_->GetEntries();
+		std::cout << "nevents: " << nevents_ << std::endl;
+		std::cout << std::endl;
+	}
+	else
+		nevents_ = maxNbrEventsToRead;
 
 	assert(startevent_>=0 and nevents_>=0);
 	
-	if (startevent_+nevents_ >= intree_->GetEntries()) {
+	if (startevent_ >= intree_->GetEntries()) {
 		startevent_ = intree_->GetEntries()-1;
 		nevents_ = 0;
+		std::cout << "WARNING: start event index too large! "
+				  << "No event will be processed." << std::endl;
 	}	
 	else if (startevent_+nevents_ > intree_->GetEntries()) {
 		nevents_ = intree_->GetEntries() - startevent_;
+		std::cout << "WARNING: not enough events to process. Only "
+				  << nevents_ << " events are processed." << std::endl;
+		std::cout << "start event index : " << startevent_ << std::endl;
 	}
 
 	looseSel_ = loose;
@@ -35,13 +47,13 @@ EventReader_MEM::~EventReader_MEM()
 }
 
 
-void EventReader_MEM::fillEventList(IntegrationMsg_t* integration, int64_t nEvents)
+void EventReader_MEM::fillEventList(IntegrationMsg_t* integration)
 {
 	int64_t k = 0; // Number of event stored
 	
 	for (int64_t i=startevent_; i < startevent_+nevents_; ++i) {
 		intree_->GetEntry(i);
-
+		
 		// apply additional selection here if needed
 		
 		// build four momentum
@@ -60,7 +72,7 @@ void EventReader_MEM::fillEventList(IntegrationMsg_t* integration, int64_t nEven
 		assert(leptons.size()>1);
 		assert(taus.size()>0);
 		assert(jets_btag.size()>1);
-
+		
 		// Fill event list
 		// leptons
 		integration[k].evLep1_4P_[0] = leptons[0].p4().Px();
@@ -68,18 +80,20 @@ void EventReader_MEM::fillEventList(IntegrationMsg_t* integration, int64_t nEven
 		integration[k].evLep1_4P_[2] = leptons[0].p4().Pz();
 		integration[k].evLep1_4P_[3] = leptons[0].p4().E();
 		integration[k].lepton1_Type_ = leptons[0].pdgId();
-
+					
 		integration[k].evLep2_4P_[0] = leptons[1].p4().Px();
 		integration[k].evLep2_4P_[1] = leptons[1].p4().Py(); 
 		integration[k].evLep2_4P_[2] = leptons[1].p4().Pz();
 		integration[k].evLep2_4P_[3] = leptons[1].p4().E();
 		integration[k].lepton2_Type_ = leptons[1].pdgId();
+				
 		// tau
 		integration[k].evHadSys_Tau_4P_[0] = taus[0].Px();
 		integration[k].evHadSys_Tau_4P_[1] = taus[0].Py();
 		integration[k].evHadSys_Tau_4P_[2] = taus[0].Pz();
 		integration[k].evHadSys_Tau_4P_[3] = taus[0].E();
 		integration[k].HadtauDecayMode_ =  evNtuple_.tau_decayMode->at(0);
+				
 		// btagged jets
 		integration[k].evBJet1_4P_[0] = jets_btag[0].Px();
 		integration[k].evBJet1_4P_[1] = jets_btag[0].Py();
@@ -89,6 +103,7 @@ void EventReader_MEM::fillEventList(IntegrationMsg_t* integration, int64_t nEven
 		integration[k].evBJet2_4P_[1] = jets_btag[1].Py();
 		integration[k].evBJet2_4P_[2] = jets_btag[1].Pz();
 		integration[k].evBJet2_4P_[3] = jets_btag[1].E();
+				
 		// untagged jets
 		integration[k].n_lightJets_ = min(10,int(jets_untag.size()) );
 		for( int j=0; j<integration[k].n_lightJets_; j++){
@@ -157,7 +172,7 @@ void EventReader_MEM::fillEventList(IntegrationMsg_t* integration, int64_t nEven
 				integration[k].evJet2_4P_[3] = 0;
 			}
 		}
-
+				
 		integration[k].evRecoMET4P_[0] = met.Px();
 		integration[k].evRecoMET4P_[1] = met.Py();
 		integration[k].evRecoMET4P_[2] = met.Pz();
