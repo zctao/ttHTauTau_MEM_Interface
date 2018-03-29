@@ -31,7 +31,7 @@ int main(const int argc, const char** argv)
 
 	namespace po = boost::program_options;
 
-	string configName, inputFileName, outputName;
+	string configName, config, inputFileName, outputName;
 	int maxNbrOfEventsToRead, startEvents;
 	
 	po::options_description desc("Options");
@@ -41,7 +41,8 @@ int main(const int argc, const char** argv)
 		("output,o", po::value<string>(&outputName)->default_value("mem_output.root"), "output name")
 		("maxevents,m", po::value<int>(&maxNbrOfEventsToRead)->default_value(-1), "max number of event to process. -1 to process all events.")
 		("startEvents,s", po::value<int>(&startEvents)->default_value(0), "start event index")
-		("config,c", po::value<string>(&configName)->default_value("ttHTauTau_MEM_Interface/MEM_Interface/mem_cfg.py"), "config file name");
+		("config,c", po::value<string>(&config)->default_value("test"), "Which config to use: choose from 'test', 'low' or 'nominal'")
+		("config_name", po::value<string>(&configName)->default_value(""), "config file name");
 
 	po::variables_map vm;
 	po::store(po::command_line_parser(argc, argv).options(desc).run(), vm);
@@ -51,6 +52,23 @@ int main(const int argc, const char** argv)
 		cout << desc << endl;
 		return 1;
 	}
+	
+	if (configName.empty()) {
+		if (config=="test")
+			configName = "ttHTauTau_MEM_Interface/MEM_Interface/mem_cfg_test.py";
+		else if (config=="low")
+			configName = "ttHTauTau_MEM_Interface/MEM_Interface/mem_cfg_lowpoints.py";
+		else if (config=="nominal")
+			configName = "ttHTauTau_MEM_Interface/MEM_Interface/mem_cfg_nominal.py";
+		else {
+			cout << "Config " << config << " is not supported." << endl;
+			cout << "Please choose from 'test', 'low' or 'nominal'" << endl;
+			cout << "Or specify config file name directly via --config_name" << endl;
+			return 1;
+		}
+	}
+
+	cout << "Using config " << configName << endl;
 	
 	// Remove ".py"
 	size_t pos = configName.find(".py", configName.length()-3);

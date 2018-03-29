@@ -31,8 +31,12 @@ Compile:
 
 ## Usage
 
-	runMEM -i <input.root> -o <output.root> -m <maxevents> -s <startevent> -c <config.py>
+	runMEM -i <input.root> -o <output.root> -m <maxevents> -s <startevent> -c <config>
+	runMEM -h for help
 
 Input ntuple is expected to be of the format defined in ttHTauTauAnalysis/ttHtautauAnalyzer/interface/eventNtuple.h
+'mem_output.root' is the default output file.
 
-An example input file 'nutple_ttH.root' and a script running on this file are provided in the test directory. By default, it uses MEM config file 'mem_cfg.py' under python directory and starts from event #0. 'mem_output.root' is the default output file.
+Three config files are provided under python directory: 'mem_cfg_test.py', 'mem_cfg_lowpints.py', 'mem_cfg_nominal.py'. By default 'mem_cfg_test.py' is used. The other two with larger number of integration points take significantly longer time to run. 
+
+An example input file 'nutple_ttH.root' and a script running on this file are provided in the test directory.
