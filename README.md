@@ -24,9 +24,6 @@ Get ttHTauTauAnalysis analyzer:
 Get interface package:
 
 	git clone https://github.com/zctao/ttHTauTau_MEM_Interface.git
-	cd ttHTauTau_MEM_Interface/
-	git checkout cmssw_9_4_x
-	cd -
 
 Compile:
 
