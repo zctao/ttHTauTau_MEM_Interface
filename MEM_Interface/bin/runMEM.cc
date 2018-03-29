@@ -11,6 +11,7 @@
 #include "ttHTauTau_MEM_Interface/MEM_Interface/interface/EventReader_MEM.h"
 
 #include <iostream>
+#include <ctime>
 
 #include "boost/program_options.hpp"
 
@@ -33,6 +34,7 @@ int main(const int argc, const char** argv)
 
 	string configName, config, inputFileName, outputName;
 	int maxNbrOfEventsToRead, startEvents;
+	bool timeit;
 	
 	po::options_description desc("Options");
 	desc.add_options()
@@ -42,7 +44,8 @@ int main(const int argc, const char** argv)
 		("maxevents,m", po::value<int>(&maxNbrOfEventsToRead)->default_value(-1), "max number of event to process. -1 to process all events.")
 		("startEvents,s", po::value<int>(&startEvents)->default_value(0), "start event index")
 		("config,c", po::value<string>(&config)->default_value("test"), "Which config to use: choose from 'test', 'low' or 'nominal'")
-		("config_name", po::value<string>(&configName)->default_value(""), "config file name");
+		("config_name", po::value<string>(&configName)->default_value(""), "config file name")
+		("timeit,t", po::value<bool>(&timeit)->default_value(false), "Run timer");
 
 	po::variables_map vm;
 	po::store(po::command_line_parser(argc, argv).options(desc).run(), vm);
@@ -74,6 +77,8 @@ int main(const int argc, const char** argv)
 	size_t pos = configName.find(".py", configName.length()-3);
 	if ( pos != string::npos )
 		configName.resize( configName.length()-3 );
+
+	std::clock_t start = std::clock();
 	
 	//
 	const RunConfig* runConfig = new RunConfig(configName.c_str());  
@@ -88,13 +93,28 @@ int main(const int argc, const char** argv)
 	//eventList_t eventList;
 	std::vector<IntegrationMsg_t> eventList;
 	eventList.resize(nEvents);
+
 	
 	evtRead->fillEventList(&eventList[0]);
 
 	delete evtRead;
+
+	if (timeit) {
+		std::cout << "Setup and filling EventReader from TTree takes ";
+		std::cout << double(std::clock()-start)/CLOCKS_PER_SEC << " s" << std::endl;
+	}
 	
 	scheduler->initNodeScheduler( runConfig, 0 );
+	if (timeit) {
+		std::cout << "initialize NodeScheduler takes ";
+		std::cout << double(std::clock()-start)/CLOCKS_PER_SEC << " s" << std::endl;
+	}
+	
 	scheduler->runNodeScheduler ( &eventList[0], nEvents );
+	if (timeit) {
+		std::cout << "Integration takes ";
+		std::cout << double(std::clock()-start)/CLOCKS_PER_SEC << " s" << std::endl;
+	}
 
 	// Write output to tree
 	TFile* f_out = new TFile(outputName.c_str(), "recreate");
